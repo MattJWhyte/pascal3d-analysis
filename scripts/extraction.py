@@ -1,8 +1,8 @@
 import scipy.io as sio
 import os
 
-IMAGESET_DIR = "PASCAL3D+_release1.1/Image_sets/"
-ANNOTATION_DIR = "PASCAL3D+_release1.1/Annotations/"
+IMAGESET_DIR = "../PASCAL3D+_release1.1/Image_sets/"
+ANNOTATION_DIR = "../PASCAL3D+_release1.1/Annotations/"
 CATEGORIES = ["aeroplane", "bicycle", "boat", "bottle", "bus", "car", "chair", "diningtable", "motorbike", "sofa", "train", "tvmonitor"]
 
 

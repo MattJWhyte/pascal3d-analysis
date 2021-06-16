@@ -28,7 +28,7 @@ def quadrant_symmetry_measure(azimuth_list, num_bins):
 
 
 def plot_azimuth_distribution(ax, azimuth_list):
-    bin_size = 15
+    bin_size = 30
     a, b = np.histogram(azimuth_list, bins=np.arange(0, 360 + bin_size, bin_size))
 
     centers = np.deg2rad(np.ediff1d(b) // 2 + b[:-1])
@@ -99,6 +99,23 @@ def get_azimuth_analysis(category, path):
     plot_azimuth_info(not_trunc_list, ax1, ax2)
 
     plt.savefig(path + "azimuth-by-truncated.png")
+
+
+def get_total_azimuth_distribution(path):
+    azimuth_list = []
+    for cat in CATEGORIES:
+        cat_azimuth_list, _ = extract_annotations_by_condition(get_imageset("imagenet", cat, "val"), cat,
+                                                           "azimuth",
+                                                           lambda x: True)
+        azimuth_list += cat_azimuth_list
+
+    fig = plt.figure(figsize=(14, 14))
+    ax1 = fig.add_subplot(1, 2, 1, projection="polar")
+    ax1.set_title("Azimuth distribution")
+    ax2 = fig.add_subplot(1, 2, 2, projection="polar")
+    ax2.set_title("Azimuth bias (avg. angle, magnitude)")
+    plot_azimuth_info(azimuth_list, ax1, ax2)
+    plt.savefig(path + "total-azimuth.png")
 
 
 def get_azimuth_distributions(dataset, path):
