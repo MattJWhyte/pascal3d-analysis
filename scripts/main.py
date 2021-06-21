@@ -56,7 +56,7 @@ def create_cropped_dataset(width,height):
                     new_bb = draw_bb.adjust_aspect_ratio(sz, bb, width/height)
                     adj_img = draw_bb.resize_img(img, sz, new_bb)
                     adj_img = cv2.resize(adj_img, (width, height))
-                    cv2.imwrite("../{}/{}_imagenet/{}.png".format(DATASET_DIR_NAME, cat, img_name), adj_img)
+                    cv2.imwrite("../{}/{}_imagenet/{}.png".format(dir, cat, img_name), adj_img)
 
 create_cropped_dataset(128,128)
 
