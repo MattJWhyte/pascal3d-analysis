@@ -11,12 +11,20 @@ import json
 def asCartesian(rthetaphi):
     #takes list rthetaphi (single coord)
     r = 1
-    theta = rthetaphi[1]* np.pi/180 # to radian
-    phi = rthetaphi[2]* np.pi/180
+    theta = np.deg2rad(90-rthetaphi[1])
+    phi = np.deg2rad(rthetaphi[2])
     x = r * np.sin( theta ) * np.cos( phi )
     y = r * np.sin( theta ) * np.sin( phi )
     z = r * np.cos( theta )
     return [x,y,z]
+
+
+def asRThetaPhi(xyz):
+    x,y,z = xyz
+    theta = np.abs(np.rad2deg(np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))))
+    if z < 0:
+        theta *= -1.0
+    return [np.sqrt(x**2+y**2+z**2), theta, np.rad2deg(np.arctan(y/(x+0.0001)))]
 
 
 def create_cropped_dataset(width,height):
@@ -26,7 +34,8 @@ def create_cropped_dataset(width,height):
         dir = DATASET_DIR_NAME + set
 
         for cat in extraction.CATEGORIES:
-            os.mkdir("../{}/{}_imagenet/".format(dir, cat))
+            if not os.path.exists("../{}/{}_imagenet/".format(dir, cat)):
+                os.mkdir("../{}/{}_imagenet/".format(dir, cat))
 
         out_dict = {}
         for cat in extraction.CATEGORIES:
@@ -39,7 +48,8 @@ def create_cropped_dataset(width,height):
                     az = ann["viewpoint"]["azimuth"]
                     el = ann["viewpoint"]["elevation"]
                     di = ann["viewpoint"]["distance"]
-                    coords = asCartesian([di, el, az])
+                    coords = asCartesian([1, el, az])
+                    d,e,a = asRThetaPhi(coords)
                     out_dict[cat][img_name] = coords
 
         with open("../" + dir + "/annotation.json", "w") as f:
@@ -58,9 +68,26 @@ def create_cropped_dataset(width,height):
                     adj_img = cv2.resize(adj_img, (width, height))
                     cv2.imwrite("../{}/{}_imagenet/{}.png".format(dir, cat, img_name), adj_img)
 
+
 create_cropped_dataset(128,128)
+'''
+xyz = asCartesian([0.0,25.0,330.0])
 
+print(asRThetaPhi(xyz))
 
+# create_cropped_dataset(128,128)
+print(xyz)
+
+fig = plt.figure()
+ax = plt.axes(projection='3d')
+
+ax.plot([0,xyz[0]],[0,xyz[1]],[0,xyz[2]])
+
+ax.plot([0,1],[0,0],[0,0], c='g')
+ax.plot([0,0],[0,1],[0,0], c='k')
+ax.plot([0,0],[0,0],[0,1], c='k')
+
+plt.savefig("test.png")'''
 '''
 count = np.zeros((21,))
 
