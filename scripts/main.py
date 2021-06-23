@@ -69,25 +69,45 @@ def create_cropped_dataset(width,height):
                     cv2.imwrite("../{}/{}_imagenet/{}.png".format(dir, cat, img_name), adj_img)
 
 
-create_cropped_dataset(128,128)
-'''
-xyz = asCartesian([0.0,25.0,330.0])
+def create_stretched_dataset(width,height):
+    DATASET_DIR_NAME = "datasets/imagenet_{}_{}_stretched_".format(width,height)
 
-print(asRThetaPhi(xyz))
+    for set in ["train", "val"]:
+        dir = DATASET_DIR_NAME + set
 
-# create_cropped_dataset(128,128)
-print(xyz)
+        for cat in extraction.CATEGORIES:
+            if not os.path.exists("../{}/{}_imagenet/".format(dir, cat)):
+                os.mkdir("../{}/{}_imagenet/".format(dir, cat))
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
+        out_dict = {}
+        for cat in extraction.CATEGORIES:
+            out_dict[cat] = {}
+            with open("../PASCAL3D+_release1.1/Image_sets/{}_imagenet_{}.txt".format(cat, set), "r") as f:
+                for img_name in f.readlines():
+                    img_name = img_name.replace("\n", "")
+                    ann = extraction.get_image_annotations(
+                        "../PASCAL3D+_release1.1/Annotations/{}_imagenet/{}.mat".format(cat, img_name), cat)[0]
+                    az = ann["viewpoint"]["azimuth"]
+                    el = ann["viewpoint"]["elevation"]
+                    di = ann["viewpoint"]["distance"]
+                    coords = asCartesian([1, el, az])
+                    d,e,a = asRThetaPhi(coords)
+                    out_dict[cat][img_name] = coords
 
-ax.plot([0,xyz[0]],[0,xyz[1]],[0,xyz[2]])
+        with open("../" + dir + "/annotation.json", "w") as f:
+            f.write(json.dumps(out_dict))
 
-ax.plot([0,1],[0,0],[0,0], c='g')
-ax.plot([0,0],[0,1],[0,0], c='k')
-ax.plot([0,0],[0,0],[0,1], c='k')
+        for cat in extraction.CATEGORIES:
+            with open("../PASCAL3D+_release1.1/Image_sets/{}_imagenet_{}.txt".format(cat, set), "r") as f:
+                for img_name in f.readlines():
+                    img_name = img_name.replace("\n", "")
+                    img = cv2.imread("../PASCAL3D+_release1.1/Images/{}_imagenet/{}.JPEG".format(cat, img_name))
+                    adj_img = cv2.resize(img, (width, height))
+                    cv2.imwrite("../{}/{}_imagenet/{}.png".format(dir, cat, img_name), adj_img)
 
-plt.savefig("test.png")'''
+
+create_stretched_dataset(128,128)
+
 '''
 count = np.zeros((21,))
 
