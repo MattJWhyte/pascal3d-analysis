@@ -104,7 +104,7 @@ def get_azimuth_analysis(category, path):
 def get_total_azimuth_distribution(path):
     azimuth_list = []
     for cat in CATEGORIES:
-        cat_azimuth_list, _ = extract_annotations_by_condition(get_imageset("imagenet", cat, "val"), cat,
+        cat_azimuth_list, _ = extract_annotations_by_condition(get_imageset("imagenet", cat, "train"), cat,
                                                            "azimuth",
                                                            lambda x: True)
         azimuth_list += cat_azimuth_list

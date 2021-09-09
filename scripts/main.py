@@ -1,7 +1,10 @@
+import sys
 
 import draw_bb
 import cv2
 import matplotlib.pyplot as plt
+import sample_distribution
+import summary_bias
 import numpy as np
 import extraction
 import os
@@ -21,10 +24,13 @@ def asCartesian(rthetaphi):
 
 def asRThetaPhi(xyz):
     x,y,z = xyz
-    theta = np.abs(np.rad2deg(np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))))
+    theta = np.abs(90-np.rad2deg(np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))))
     if z < 0:
         theta *= -1.0
-    return [np.sqrt(x**2+y**2+z**2), theta, np.rad2deg(np.arctan(y/(x+0.0001)))]
+    phi = np.rad2deg(np.arctan2(y,x))
+    if phi < 0.0:
+        phi += 360.0
+    return [np.sqrt(x**2+y**2+z**2), theta, phi]
 
 
 def create_cropped_dataset(width,height):
@@ -50,6 +56,10 @@ def create_cropped_dataset(width,height):
                     di = ann["viewpoint"]["distance"]
                     coords = asCartesian([1, el, az])
                     d,e,a = asRThetaPhi(coords)
+                    if np.abs(e-el) >= 1 or np.abs(a-az) > 1:
+                        print("{} {}".format(el, e))
+                        print("{} {}".format(az,a))
+                        sys.exit()
                     out_dict[cat][img_name] = coords
 
         with open("../" + dir + "/annotation.json", "w") as f:
@@ -92,6 +102,10 @@ def create_stretched_dataset(width,height):
                     di = ann["viewpoint"]["distance"]
                     coords = asCartesian([1, el, az])
                     d,e,a = asRThetaPhi(coords)
+                    if np.abs(e-el) >= 0.5 or np.abs(a-az) > 0.5:
+                        print("Elev {} {}".format(el, e))
+                        print("Az {} {}".format(az,a))
+                        sys.exit()
                     out_dict[cat][img_name] = coords
 
         with open("../" + dir + "/annotation.json", "w") as f:
@@ -106,7 +120,16 @@ def create_stretched_dataset(width,height):
                     cv2.imwrite("../{}/{}_imagenet/{}.png".format(dir, cat, img_name), adj_img)
 
 
-create_stretched_dataset(128,128)
+#sample_distribution.get_total_azimuth_distribution("../analysis/imagenet/")
+
+train_az = summary_bias.get_azimuth("imagenet", "train")
+val_az = summary_bias.get_azimuth("imagenet", "val")
+
+
+json.dump({
+    "val": val_az,
+    "train": train_az
+}, open("../az_data.txt", "w"))
 
 '''
 count = np.zeros((21,))

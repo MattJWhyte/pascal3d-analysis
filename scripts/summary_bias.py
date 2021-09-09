@@ -61,6 +61,26 @@ def get_avg_azimuth(dataset, condition, include_coarse=False):
     return true_bias_list, false_bias_list
 
 
+def get_azimuth(dataset, subset):
+    az_list = []
+    for cat in CATEGORIES:
+        img_list = get_imageset(dataset, cat, subset)
+        true_cond_list, _ = extract_annotations_by_condition(img_list, cat, "azimuth", lambda x: True,
+                                                    include_coarse=False, single=True)
+        az_list += true_cond_list
+    return az_list
+
+
+def get_azimuth_by_cat(dataset, subset):
+    az_list = {}
+    for cat in CATEGORIES:
+        img_list = get_imageset(dataset, cat, subset)
+        true_cond_list, _ = extract_annotations_by_condition(img_list, cat, "azimuth", lambda x: True,
+                                                    include_coarse=False, single=True)
+        az_list[cat] = [float(a) for a in true_cond_list]
+    return az_list
+
+
 def plot_avg_azimuth(ax, bias_list):
     for i in range(len(CATEGORIES)):
         bias = bias_list[i]
